@@ -49,8 +49,8 @@ class ServiceImageManager(EsiBase):
     IMAGE_NAME = 'eucalyptus-service-image'
     IMAGE_RE = re.compile('^eucalyptus-service-image')
 
-    def __init__(self, region, debug=False):
-        super(self.__class__, self).__init__(region if region else 'localhost')
+    def __init__(self, args, debug=False):
+        super(self.__class__, self).__init__(args)
         self._ec2 = boto.connect_ec2_endpoint(self.get_env_var('EC2_URL'))
         self._populate_images()
         self._debug = debug
@@ -231,12 +231,10 @@ if __name__ == "__main__":
                         enabled Service images.''')
     parser.add_argument('--debug', help='Show debugging output', action='store_true')
     parser.add_argument('--force-version', help=argparse.SUPPRESS)
-    parser.add_argument('--region', metavar='REGION', help=('region '
-                                                            'name to search when looking up config file data'))
+    EsiBase.add_arguments(parser)
 
     args = parser.parse_args()
-    ism = ServiceImageManager(args.region if args.region is not None else os.getenv("AWS_DEFAULT_REGION"),
-                              args.debug)
+    ism = ServiceImageManager(args.debug)
 
     if args.tarball:
         image_name = "{0}-v{1}".format(ServiceImageManager.IMAGE_NAME, args.force_version)

@@ -24,12 +24,26 @@ from boto.sts import STSConnection
 
 
 class EsiBase(object):
-    def __init__(self, region='localhost'):
+    def __init__(self, args):
         self.vars = {}
-        self.region = region
+        self.args = args
+        def_region = os.getenv("AWS_DEFAULT_REGION")
+        self.region = args.region if args.region is not None else 'localhost' if def_region is None else def_region
         self._load_vars()
         self.check_environment()
         self._set_environment()
+
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument('--t_url', metavar='TOKEN_URL', help="URL to TOKEN service")
+        parser.add_argument('--cf_url', metavar='AWS_CLOUDFORMATION_URL', help="URL to CLOUDFORMATION service")
+        parser.add_argument('--eb_url', metavar='EUCA_BOOTSTRAP_URL', help="URL to BOOTSTRAP service")
+        parser.add_argument('--ep_url', metavar='EUCA_PROPERTIES_URL', help="URL to PROPERTIES service")
+        parser.add_argument('--ec_path', metavar='EUCALYPTUS_CERT', help="Path to EUCALYPTUS certificate")
+        parser.add_argument('--iam_url', metavar='AWS_IAM_URL', help="URL to IAM service")
+        parser.add_argument('--region', metavar='REGION', help=('region '
+                                                                'name to search when looking up config file data'))
+
 
     def get_sts_connection(self):
         token_url = urlparse(self.vars['TOKEN_URL'])
@@ -68,9 +82,23 @@ class EsiBase(object):
         # assume eucalyptus account since this is a system tool
         if self.get_env_var('EC2_USER_ID') is None:
             self.vars['EC2_USER_ID'] = self.list_system_accounts()['eucalyptus']
-        # if EUCA_PROPERTIES_URL is not set let's assume that the command is invoked on CLC
         if self.get_env_var('EUCA_PROPERTIES_URL') is None:
-            self.vars['EUCA_PROPERTIES_URL'] = 'http://127.0.0.1:8773/services/Properties/'
+            if self.args.ep_url is not None:
+                self.vars['EUCA_PROPERTIES_URL'] = self.args.ep_url
+            else:
+                # if EUCA_PROPERTIES_URL is not set let's assume that the command is invoked on CLC
+                self.vars['EUCA_PROPERTIES_URL'] = 'http://127.0.0.1:8773/services/Properties/'
+        if self.get_env_var('TOKEN_URL') is None:
+            self.vars['TOKEN_URL'] = self.args.t_url
+        if self.get_env_var('AWS_CLOUDFORMATION_URL') is None:
+            self.vars['AWS_CLOUDFORMATION_URL'] = self.args.cf_url
+        if self.get_env_var('EUCA_BOOTSTRAP_URL') is None:
+            self.vars['EUCA_BOOTSTRAP_URL'] = self.args.eb_url
+        if self.get_env_var('EUCALYPTUS_CERT') is None:
+            self.vars['EUCALYPTUS_CERT'] = self.args.ec_path
+        if self.get_env_var('AWS_IAM_URL') is None:
+            self.vars['AWS_IAM_URL'] = self.args.iam_url
+
 
     @staticmethod
     def _check_binary(binary):
