@@ -233,7 +233,7 @@ if __name__ == "__main__":
     parser.add_argument('--force-version', help=argparse.SUPPRESS)
     EsiBase.add_arguments(parser)
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
     ism = ServiceImageManager(args.debug)
 
     if args.tarball:

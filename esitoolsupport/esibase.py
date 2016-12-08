@@ -43,7 +43,8 @@ class EsiBase(object):
         parser.add_argument('--iam_url', metavar='AWS_IAM_URL', help="URL to IAM service")
         parser.add_argument('--region', metavar='REGION', help=('region '
                                                                 'name to search when looking up config file data'))
-
+        parser.add_argument('-I', metavar='KEY_ID', help="user's access key id")
+        parser.add_argument('-S', metavar='KEY', help="user's secret key id")
 
     def get_sts_connection(self):
         token_url = urlparse(self.vars['TOKEN_URL'])
@@ -98,7 +99,10 @@ class EsiBase(object):
             self.vars['EUCALYPTUS_CERT'] = self.args.ec_path
         if self.get_env_var('AWS_IAM_URL') is None:
             self.vars['AWS_IAM_URL'] = self.args.iam_url
-
+        if self.get_env_var('AWS_ACCESS_KEY_ID') is None:
+            self.vars['AWS_ACCESS_KEY_ID'] = self.args.I
+        if self.get_env_var('AWS_SECRET_ACCESS_KEY') is None:
+            self.vars['AWS_SECRET_ACCESS_KEY'] = self.args.S
 
     @staticmethod
     def _check_binary(binary):

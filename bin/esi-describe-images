@@ -117,7 +117,7 @@ if __name__ == "__main__":
     parser.add_argument('--show-instances', action='store_true', help='')
     parser.add_argument('--region', metavar='REGION', help=('region '
                                                             'name to search when looking up config file data'))
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
 
     ism = ServiceImageManager(args)
     ism.list(show_instances=args.show_instances)

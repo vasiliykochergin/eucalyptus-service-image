@@ -148,7 +148,7 @@ if __name__ == "__main__":
                         choices=['create', 'delete', 'check'])
     EsiBase.add_arguments(parser)
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
     sm = StackManager(args)
 
     if args.action == 'create':
