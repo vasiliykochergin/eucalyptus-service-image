@@ -62,7 +62,7 @@ class EsiBase(object):
     def list_system_accounts(self):
         accounts = {}
         process = subprocess.Popen(['/usr/bin/euare-accountlist', '-U', self.vars['AWS_IAM_URL'],
-                                    '-I', self.vars['AWS_ACCESS_KEY_ID'], '-U', self.vars['AWS_SECRET_ACCESS_KEY']],
+                                    '-I', self.vars['AWS_ACCESS_KEY_ID'], '-S', self.vars['AWS_SECRET_ACCESS_KEY']],
                                    stdout=subprocess.PIPE)
         for line in process.stdout:
             split = line.strip().split(None, 1)
@@ -87,22 +87,17 @@ class EsiBase(object):
             else:
                 # if EUCA_PROPERTIES_URL is not set let's assume that the command is invoked on CLC
                 self.vars['EUCA_PROPERTIES_URL'] = 'http://127.0.0.1:8773/services/Properties/'
-        if self.get_env_var('TOKEN_URL') is None:
-            self.vars['TOKEN_URL'] = self.args.t_url
-        if self.get_env_var('AWS_CLOUDFORMATION_URL') is None:
-            self.vars['AWS_CLOUDFORMATION_URL'] = self.args.cf_url
-        if self.get_env_var('EUCA_BOOTSTRAP_URL') is None:
-            self.vars['EUCA_BOOTSTRAP_URL'] = self.args.eb_url
-        if self.get_env_var('EUCALYPTUS_CERT') is None:
-            self.vars['EUCALYPTUS_CERT'] = self.args.ec_path
-        if self.get_env_var('AWS_IAM_URL') is None:
-            self.vars['AWS_IAM_URL'] = self.args.iam_url
-        if self.get_env_var('AWS_ACCESS_KEY_ID') is None:
-            self.vars['AWS_ACCESS_KEY_ID'] = self.args.I
-        if self.get_env_var('AWS_SECRET_ACCESS_KEY') is None:
-            self.vars['AWS_SECRET_ACCESS_KEY'] = self.args.S
-        if self.get_env_var('EC2_URL') is None:
-            self.vars['EC2_URL'] = self.args.ec2_url
+        VAR_NAMES = {'TOKEN_URL': 't_url',
+                     'AWS_CLOUDFORMATION_URL': 'cf_url',
+                     'EUCA_BOOTSTRAP_URL': 'eb_url',
+                     'EUCALYPTUS_CERT': 'ec_path',
+                     'AWS_IAM_URL': 'iam_url',
+                     'AWS_ACCESS_KEY_ID': 'I',
+                     'AWS_SECRET_ACCESS_KEY': 'S',
+                     'EC2_URL': 'ec2_url'}
+        for k, v in VAR_NAMES.items():
+            if self.get_env_var(k) is None:
+                self.vars[k] = self.args[v]
         # assume eucalyptus account since this is a system tool
         if self.get_env_var('EC2_USER_ID') is None:
             self.vars['EC2_USER_ID'] = self.list_system_accounts()['eucalyptus']
