@@ -35,16 +35,17 @@ class EsiBase(object):
 
     @staticmethod
     def add_arguments(parser):
+        parser.add_argument('--region', metavar='REGION', help=('region '
+                                                                'name to search when looking up config file data'))
+        parser.add_argument('-I', metavar='KEY_ID', help="user's access key id")
+        parser.add_argument('-S', metavar='KEY', help="user's secret key id")
+        parser.add_argument('--ec2_url', metavar='EC2_URL', help="URL to EC2 service")
         parser.add_argument('--t_url', metavar='TOKEN_URL', help="URL to TOKEN service")
         parser.add_argument('--cf_url', metavar='AWS_CLOUDFORMATION_URL', help="URL to CLOUDFORMATION service")
         parser.add_argument('--eb_url', metavar='EUCA_BOOTSTRAP_URL', help="URL to BOOTSTRAP service")
         parser.add_argument('--ep_url', metavar='EUCA_PROPERTIES_URL', help="URL to PROPERTIES service")
         parser.add_argument('--ec_path', metavar='EUCALYPTUS_CERT', help="Path to EUCALYPTUS certificate")
         parser.add_argument('--iam_url', metavar='AWS_IAM_URL', help="URL to IAM service")
-        parser.add_argument('--region', metavar='REGION', help=('region '
-                                                                'name to search when looking up config file data'))
-        parser.add_argument('-I', metavar='KEY_ID', help="user's access key id")
-        parser.add_argument('-S', metavar='KEY', help="user's secret key id")
 
     def get_sts_connection(self):
         token_url = urlparse(self.vars['TOKEN_URL'])
@@ -103,6 +104,8 @@ class EsiBase(object):
             self.vars['AWS_ACCESS_KEY_ID'] = self.args.I
         if self.get_env_var('AWS_SECRET_ACCESS_KEY') is None:
             self.vars['AWS_SECRET_ACCESS_KEY'] = self.args.S
+        if self.get_env_var('EC2_URL') is None:
+            self.vars['EC2_URL'] = self.args.ec2_url
 
     @staticmethod
     def _check_binary(binary):
