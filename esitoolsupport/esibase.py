@@ -61,7 +61,8 @@ class EsiBase(object):
 
     def list_system_accounts(self):
         accounts = {}
-        process = subprocess.Popen(['/usr/bin/euare-accountlist', '-U', self.vars['AWS_IAM_URL']],
+        process = subprocess.Popen(['/usr/bin/euare-accountlist', '-U', self.vars['AWS_IAM_URL'],
+                                    '-I', self.vars['AWS_ACCESS_KEY_ID'], '-U', self.vars['AWS_SECRET_ACCESS_KEY']],
                                    stdout=subprocess.PIPE)
         for line in process.stdout:
             split = line.strip().split(None, 1)
