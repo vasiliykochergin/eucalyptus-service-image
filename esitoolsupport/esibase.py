@@ -95,9 +95,10 @@ class EsiBase(object):
                      'AWS_ACCESS_KEY_ID': 'I',
                      'AWS_SECRET_ACCESS_KEY': 'S',
                      'EC2_URL': 'ec2_url'}
+        opts = vars(self.args)
         for k, v in VAR_NAMES.items():
             if self.get_env_var(k) is None:
-                self.vars[k] = self.args[v]
+                self.vars[k] = opts[v]
         # assume eucalyptus account since this is a system tool
         if self.get_env_var('EC2_USER_ID') is None:
             self.vars['EC2_USER_ID'] = self.list_system_accounts()['eucalyptus']
