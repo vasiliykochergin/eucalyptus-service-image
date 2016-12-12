@@ -106,7 +106,7 @@ class ServiceImageManager(EsiBase):
                     print line.strip()
                 except:
                     pass
-        stderr = process.stderr.read() if not debug else "SEE OUTPUT ABOVE"
+        stderr = process.stderr.read() if not self.debug else "SEE OUTPUT ABOVE"
         stdout = process.stdout.read()
         if process.returncode > 0:
             print "Error: Unable to install imaging worker due to:\n" \
