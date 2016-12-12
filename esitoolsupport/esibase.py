@@ -29,11 +29,12 @@ class EsiBase(object):
         self.args = args
         def_region = os.getenv("AWS_DEFAULT_REGION")
         self.region = args.region if args.region is not None else 'localhost' if def_region is None else def_region
+        self.debug = args.debug
         if self.debug:
             print "Using {0} region".format(self.region)
         self._load_vars()
         self._set_environment()
-        self.debug = args.debug
+
 
     @staticmethod
     def add_arguments(parser):
