@@ -29,14 +29,17 @@ class EsiBase(object):
         self.args = args
         def_region = os.getenv("AWS_DEFAULT_REGION")
         self.region = args.region if args.region is not None else 'localhost' if def_region is None else def_region
+        if self.debug:
+            print "Using {0} region".format(self.region)
         self._load_vars()
-        self.check_environment()
         self._set_environment()
+        self.debug = args.debug
 
     @staticmethod
     def add_arguments(parser):
         parser.add_argument('--region', metavar='REGION', help=('region '
                                                                 'name to search when looking up config file data'))
+        parser.add_argument('--debug', help='Show debugging output', action='store_true')
         parser.add_argument('-I', metavar='KEY_ID', help="user's access key id")
         parser.add_argument('-S', metavar='KEY', help="user's secret key id")
         parser.add_argument('--ec2_url', metavar='EC2_URL', help="URL to EC2 service")
@@ -81,13 +84,9 @@ class EsiBase(object):
                 v = var.split("=")
                 if len(v) == 2:
                     self.vars[v[0]] = v[1] if v[1] != '' else None
-        if self.get_env_var('EUCA_PROPERTIES_URL') is None:
-            if self.args.ep_url is not None:
-                self.vars['EUCA_PROPERTIES_URL'] = self.args.ep_url
-            else:
-                # if EUCA_PROPERTIES_URL is not set let's assume that the command is invoked on CLC
-                self.vars['EUCA_PROPERTIES_URL'] = 'http://127.0.0.1:8773/services/Properties/'
-        VAR_NAMES = {'TOKEN_URL': 't_url',
+        opts = vars(self.args)
+        VAR_NAMES = {'EUCA_PROPERTIES_URL': 'ep_url',
+                     'TOKEN_URL': 't_url',
                      'AWS_CLOUDFORMATION_URL': 'cf_url',
                      'EUCA_BOOTSTRAP_URL': 'eb_url',
                      'EUCALYPTUS_CERT': 'ec_path',
@@ -95,10 +94,13 @@ class EsiBase(object):
                      'AWS_ACCESS_KEY_ID': 'I',
                      'AWS_SECRET_ACCESS_KEY': 'S',
                      'EC2_URL': 'ec2_url'}
-        opts = vars(self.args)
         for k, v in VAR_NAMES.items():
-            if self.get_env_var(k) is None:
+            if self.get_env_var(k) is None and v in opts:
                 self.vars[k] = opts[v]
+        if self.debug:
+            print "Current settings {0}".format(self.vars)
+        # time to check vars
+        self.check_environment()
         # assume eucalyptus account since this is a system tool
         if self.get_env_var('EC2_USER_ID') is None:
             self.vars['EC2_USER_ID'] = self.list_system_accounts()['eucalyptus']
